@@ -1,32 +1,50 @@
-name: Générer APK MIU KESA
+
+name: Build APK MIU KESA
+
 on:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Récupérer le projet
+      - name: Recuperer le projet
         uses: actions/checkout@v4
+
       - name: Installer Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
+
       - name: Installer Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Installer les dépendances
+
+      - name: Installer les dependances
         run: npm install
-      - name: Créer le projet Android
-        run: npx cap add android
-      - name: Synchroniser l'application
+
+      - name: Creer le projet Android si necessaire
+        run: |
+          if [ ! -d android ]; then
+            npx cap add android
+          fi
+
+      - name: Synchroniser Capacitor
         run: npx cap sync android
-      - name: Générer l'APK de test
+
+      - name: Generer l'APK
         working-directory: android
         run: chmod +x gradlew && ./gradlew assembleDebug
-      - name: Publier l'APK
+
+      - name: Publier le fichier APK
         uses: actions/upload-artifact@v4
         with:
           name: MIU-KESA-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
